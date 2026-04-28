@@ -67,11 +67,25 @@ The language selector (8 languages) translates UI text via the Cloud Translation
 
 ## App Sections
 
-1. **Interactive Election Timeline** — 6-step horizontal stepper explaining the Indian voting journey.
+1. **Interactive Election Timeline** — 6-step horizontal stepper explaining the Indian voting journey with official verification badges.
 2. **AI Chat Assistant** — Floating Gemini-powered panel with streaming and suggested questions like "What is an EPIC card?".
 3. **Polling Station Finder** — Address form calling Maps API with interactive map results.
 4. **Video Learning Hub** — Lazy-loaded YouTube video grid with embedded players for ECI guides.
 5. **Accessibility Bar** — Language, font size, contrast, dark mode, and read-aloud controls.
+6. **Official Verification** — Contextual links to ECI and NVSP portals embedded directly in action items.
+
+## Cloud Run Deployment
+
+The app is configured for deployment on Google Cloud Run:
+- **Project ID**: `promptwars2-494717`
+- **Region**: `asia-south1` (Mumbai)
+
+To redeploy, ensure your `gcloud` CLI is authenticated and run:
+```bash
+gcloud builds submit --config cloudbuild.yaml \
+  --substitutions "_VITE_GEMINI_API_KEY=...,_VITE_MAPS_API_KEY=..."
+```
+
 
 ## Testing
 
