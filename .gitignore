@@ -26,3 +26,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Coverage
+coverage/
+
+# Linting
+eslint_errors*txt

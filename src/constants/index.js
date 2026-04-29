@@ -3,7 +3,10 @@
  * Centralized store for magic strings, numbers, and config values.
  */
 
-// API Endpoints
+/**
+ * API Endpoints for external services.
+ * @type {Object}
+ */
 export const API_ENDPOINTS = {
   GEMINI: 'https://generativelanguage.googleapis.com',
   GOOGLE_MAPS_GEOCODE: 'https://maps.googleapis.com/maps/api/geocode/json',
@@ -13,7 +16,10 @@ export const API_ENDPOINTS = {
   CLOUD_TRANSLATE: 'https://translation.googleapis.com/language/translate/v2',
 };
 
-// Model Config
+/**
+ * Configuration for the Gemini AI model.
+ * @type {Object}
+ */
 export const AI_CONFIG = {
   MODEL_NAME: 'gemini-flash-latest',
   SYSTEM_INSTRUCTION: `You are ElectionIQ, a helpful and non-partisan election education assistant for India. Explain voting, registration (Form 6), EPIC cards, EVMs, and VVPAT clearly. Use markdown.`,
@@ -21,13 +27,19 @@ export const AI_CONFIG = {
   WARNING_THRESHOLD: 8,
 };
 
-// Map Config
+/**
+ * Configuration for Google Maps services.
+ * @type {Object}
+ */
 export const MAP_CONFIG = {
   DEFAULT_COUNTRY: 'country:IN',
   MOCK_DELAY: 800,
 };
 
-// YouTube Config
+/**
+ * Configuration for YouTube Data API v3.
+ * @type {Object}
+ */
 export const YOUTUBE_CONFIG = {
   MAX_RESULTS: '3',
   CACHE_KEY: 'yt_election_videos',
@@ -35,7 +47,10 @@ export const YOUTUBE_CONFIG = {
   DEFAULT_QUERY: '"how to vote in india" OR "voter registration india" official election commission',
 };
 
-// TTS Config
+/**
+ * Configuration for Cloud Text-to-Speech API.
+ * @type {Object}
+ */
 export const TTS_CONFIG = {
   VOICE_MAP: {
     en: { languageCode: 'en-US', name: 'en-US-Chirp3-HD-Charon' },
@@ -54,18 +69,28 @@ export const TTS_CONFIG = {
   },
 };
 
-// Translation Config
+/**
+ * Configuration for Cloud Translation API.
+ * @type {Object}
+ */
 export const TRANSLATE_CONFIG = {
   DEBOUNCE_TIMER: 500,
 };
 
-// Validation Config
+/**
+ * Configuration for input validation.
+ * @type {Object}
+ */
 export const VALIDATION_CONFIG = {
   MIN_ADDRESS_LENGTH: 10,
+  MAX_ADDRESS_LENGTH: 200,
   MAX_CHAT_LENGTH: 500,
 };
 
-// Language List
+/**
+ * Supported languages for the application.
+ * @type {Array<{code: string, name: string, nativeName: string}>}
+ */
 export const LANGUAGES = [
   { code: 'en', name: 'English', nativeName: 'English' },
   { code: 'es', name: 'Spanish', nativeName: 'Español' },
@@ -77,7 +102,10 @@ export const LANGUAGES = [
   { code: 'sw', name: 'Swahili', nativeName: 'Kiswahili' },
 ];
 
-// Suggested Chat Questions
+/**
+ * Suggested questions for the AI assistant.
+ * @type {string[]}
+ */
 export const SUGGESTED_QUESTIONS = [
   'What is an EPIC card?',
   'How do I register using Form 6?',
@@ -87,7 +115,10 @@ export const SUGGESTED_QUESTIONS = [
   'How do I check my name in the voter list?',
 ];
 
-// Timeline Step Data
+/**
+ * Step-by-step data for the election timeline.
+ * @type {Array<Object>}
+ */
 export const TIMELINE_STEPS = [
   {
     id: 'eligibility',
@@ -179,3 +210,135 @@ export const TIMELINE_STEPS = [
     patternClass: 'pattern-grid',
   },
 ];
+
+/**
+ * Caching configuration.
+ * @type {Object}
+ */
+export const CACHE_CONFIG = {
+  DEFAULT_TTL: 30 * 60 * 1000, // 30 minutes
+};
+
+/**
+ * Mock data for demo responses.
+ * @type {Object}
+ */
+export const MOCK_RESPONSES = {
+  default: `Great question! Here's what you should know about the Indian election process:\n\nThe Election Commission of India (ECI) ensures free and fair elections. The process begins with voter registration. You can register online through the Voters' Service Portal or the Voter Helpline App by filling out Form 6.\n\nOnce registered, your name is added to the Electoral Roll (voter list) and you will receive an EPIC (Elector's Photo Identity Card). On polling day, you can cast your vote at your designated polling station using an EVM (Electronic Voting Machine), with a VVPAT to verify your vote.\n\nIs there anything specific about the Indian voting process you'd like to know more about?`,
+
+  eligibility: `To be eligible to vote in Indian elections, you must meet these requirements:\n\n1. **Indian Citizenship** — You must be a citizen of India.\n\n2. **Age Requirement** — You must be 18 years old on or before the qualifying date (usually January 1st of the year of revision of electoral roll).\n\n3. **Ordinary Resident** — You must be ordinarily resident of the polling area of the constituency where you want to be enrolled.\n\n4. **Not Disqualified** — You must not be disqualified from voting under any law relating to corrupt practices or other offences.\n\nNRIs (Non-Resident Indians) holding an Indian passport can also register to vote in their home constituency.`,
+
+  registration: `Registering to vote in India is straightforward! Here are your options:\n\n**Online Registration:** Use the Voters' Service Portal (voters.eci.gov.in) or the Voter Helpline App on your phone. You need to fill out **Form 6** for new voter registration.\n\n**Required Documents:** You'll need a passport-size photograph, proof of age (e.g., birth certificate, 10th marksheet), and proof of residence (e.g., electricity bill, Aadhaar card, passport).\n\n**Offline Registration:** Download Form 6, fill it out, and submit it to your local Electoral Registration Officer (ERO) or Booth Level Officer (BLO).\n\nAfter verification, your name will be added to the Electoral Roll, and an EPIC (Voter ID) card will be sent to your address.`,
+
+  polling: `Finding your polling booth is easy! Here's how:\n\n**Online Lookup:** Visit the official ECI portal and search the Electoral Roll using your EPIC number. It will show your Part Number, Serial Number, and the exact name of your polling station (usually a local government school or community hall).\n\n**Voter Information Slip:** BLOs usually distribute voter slips before the election day detailing your polling booth.\n\n**On Election Day:** Polling stations are typically open from 7:00 AM to 6:00 PM. Mobile phones are not allowed inside the booth.\n\n**What to Bring:** Bring your EPIC (Voter ID) card. If you don't have it, the ECI allows other approved photo ID documents like an Aadhaar card, PAN card, or Passport.`,
+
+  ballot: `India uses EVMs (Electronic Voting Machines) instead of paper ballots for most elections:\n\n**EVMs:** The voting machine has a Ballot Unit with the names and symbols of candidates. Press the blue button next to your chosen candidate's symbol. The red light will glow, and you will hear a loud beep confirming your vote.\n\n**VVPAT:** The Voter Verifiable Paper Audit Trail (VVPAT) machine is kept next to the EVM. When you vote, a paper slip showing the serial number, name, and symbol of your chosen candidate will be visible for 7 seconds behind a glass window before dropping into a sealed box.\n\n**NOTA:** If you don't want to vote for any candidate, you can press the NOTA (None of the Above) button at the bottom of the EVM.`,
+
+  results: `Here's how election results work in India:\n\n**Counting Day:** EVMs are stored in heavily guarded strongrooms until the designated Counting Day. Counting takes place in the presence of candidates and their agents.\n\n**EVM Counting:** Votes from EVMs are tallied round by round. VVPAT slips from randomly selected polling stations are also counted to verify the EVM results.\n\n**Majority:** For the Lok Sabha (national), a party or coalition needs a majority of 272 out of 543 seats to form the government. Vidhan Sabha (state) majorities depend on the state's total seats.\n\n**Results:** The ECI publishes the results live on their official website and Voter Helpline App. Once a candidate secures the highest votes in a constituency, the Returning Officer officially declares them the winner.`,
+};
+
+/**
+ * Mock civic data for demo mode.
+ * @type {Object}
+ */
+export const MOCK_CIVIC_DATA = {
+  election: {
+    name: 'General Election to Lok Sabha — Demo Data',
+    electionDay: '2026-05-15',
+    id: '9000',
+  },
+  pollingLocations: [
+    {
+      address: {
+        locationName: 'Government Boys Senior Secondary School',
+        line1: 'Room No. 2, Ground Floor',
+        city: 'New Delhi',
+        state: 'Delhi',
+        zip: '110001',
+      },
+      pollingHours: '7:00 AM – 6:00 PM',
+      notes: 'Please bring your EPIC card or Aadhaar card. Mobile phones are strictly prohibited inside the booth.',
+      lat: 28.6139,
+      lng: 77.2090
+    },
+  ],
+  officials: [
+    {
+      name: 'P. Kumar',
+      office: 'Booth Level Officer (BLO)',
+      party: 'Election Commission of India',
+      phones: ['1950 (Voter Helpline)'],
+      emails: ['ceo_delhi@eci.gov.in'],
+    },
+    {
+      name: 'District Magistrate',
+      office: 'District Election Officer (DEO)',
+      party: 'Nonpartisan',
+      phones: ['011-23392339'],
+    },
+  ],
+  lat: 28.6139,
+  lng: 77.2090
+};
+
+/**
+ * Mock video data for demo mode.
+ * @type {Array<Object>}
+ */
+export const MOCK_VIDEOS = [
+  {
+    id: 'dQw4w9WgXcQ',
+    title: 'How to Vote using EVM and VVPAT - Official ECI Guide',
+    channelTitle: 'Election Commission of India',
+    thumbnail: 'https://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg',
+    viewCount: '5,450,000',
+    publishedAt: '2024-03-15',
+  },
+  {
+    id: 'dQw4w9WgXcQ',
+    title: 'How to Register as a New Voter online via Voters Service Portal',
+    channelTitle: 'Election Commission of India',
+    thumbnail: 'https://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg',
+    viewCount: '2,120,000',
+    publishedAt: '2024-02-22',
+  },
+  {
+    id: 'dQw4w9WgXcQ',
+    title: 'Understanding Indian Elections: Lok Sabha and Vidhan Sabha',
+    channelTitle: 'Sansad TV',
+    thumbnail: 'https://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg',
+    viewCount: '3,780,000',
+    publishedAt: '2024-01-10',
+  },
+];
+
+/**
+ * Mock translations for demo mode.
+ * @type {Object}
+ */
+export const MOCK_TRANSLATIONS = {
+  hi: {
+    'Check Eligibility': 'पात्रता जांचें',
+    'Register to Vote': 'मतदान के लिए पंजीकरण करें',
+    'Find Your Polling Place': 'अपना मतदान केंद्र खोजें',
+    'Learn the Ballot': 'ईवीएम को समझें',
+    'Cast Your Vote': 'अपना वोट डालें',
+    'Understand Results': 'परिणाम समझें',
+  },
+  es: {
+    'Check Eligibility': 'Verificar Elegibilidad',
+    'Register to Vote': 'Registrarse para Votar',
+    'Find Your Polling Place': 'Encuentra tu Lugar de Votación',
+    'Learn the Ballot': 'Conoce la Boleta',
+    'Cast Your Vote': 'Emite tu Voto',
+    'Understand Results': 'Entiende los Resultados',
+  },
+  fr: {
+    'Check Eligibility': 'Vérifier l\'Éligibilité',
+    'Register to Vote': 'S\'inscrire pour Voter',
+    'Find Your Polling Place': 'Trouvez Votre Bureau de Vote',
+    'Learn the Ballot': 'Comprendre le Bulletin',
+    'Cast Your Vote': 'Votez',
+    'Understand Results': 'Comprendre les Resultados',
+  },
+};
