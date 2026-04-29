@@ -5,6 +5,10 @@ import { useState } from 'react';
 import useYouTube from '../../hooks/useYouTube';
 import SkeletonLoader from '../SkeletonLoader/SkeletonLoader';
 
+/**
+ * VideoHub component displaying a grid of election education videos.
+ * @returns {JSX.Element} The rendered VideoHub component.
+ */
 export default function VideoHub() {
   const { videos, loading, error, isDemo } = useYouTube();
   const [activeVideo, setActiveVideo] = useState(null);

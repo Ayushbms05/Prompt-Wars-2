@@ -4,20 +4,37 @@
 import { Component } from 'react';
 import PropTypes from 'prop-types';
 
+/**
+ * ErrorBoundary class component to catch JavaScript errors anywhere in their child component tree.
+ */
 export default class ErrorBoundary extends Component {
+  /**
+   * @param {Object} props - Component props.
+   */
   constructor(props) {
     super(props);
     this.state = { hasError: false, error: null };
   }
 
+  /**
+   * Updates state so the next render will show the fallback UI.
+   * @param {Error} error - The error that was thrown.
+   * @returns {{hasError: boolean, error: Error}} The new state.
+   */
   static getDerivedStateFromError(error) {
     return { hasError: true, error };
   }
 
+  /**
+   * Resets the error state to allow retrying the component load.
+   */
   handleRetry = () => {
     this.setState({ hasError: false, error: null });
   };
 
+  /**
+   * @returns {JSX.Element} The rendered component or fallback UI.
+   */
   render() {
     if (this.state.hasError) {
       return (
@@ -47,6 +64,8 @@ export default class ErrorBoundary extends Component {
 }
 
 ErrorBoundary.propTypes = {
+  /** The child components to wrap */
   children: PropTypes.node.isRequired,
+  /** Optional title for the error message */
   title: PropTypes.string,
 };

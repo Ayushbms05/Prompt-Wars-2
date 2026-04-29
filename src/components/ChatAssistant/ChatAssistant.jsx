@@ -5,15 +5,23 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import useGemini from '../../hooks/useGemini';
-import { sanitizeInput } from '../../utils/sanitize';
-import { SUGGESTED_QUESTIONS } from '../../utils/mockData';
+import { validateChatInput } from '../../utils/validate';
+import { SUGGESTED_QUESTIONS, AI_CONFIG, VALIDATION_CONFIG } from '../../constants';
 
+/**
+ * ChatAssistant component for AI-powered Q&A.
+ * @param {Object} props - Component props.
+ * @param {boolean} props.isOpen - Whether the chat panel is open.
+ * @param {Function} props.onToggle - Callback to toggle the chat panel visibility.
+ * @param {string} [props.prefillMessage] - Optional message to pre-populate the input.
+ * @returns {JSX.Element} The rendered ChatAssistant component.
+ */
 export default function ChatAssistant({ isOpen, onToggle, prefillMessage }) {
   const {
     messages,
     sendMessage,
     isStreaming,
-    error,
+    error: apiError,
     resetChat,
     messageCount,
     isWarning,
@@ -22,9 +30,12 @@ export default function ChatAssistant({ isOpen, onToggle, prefillMessage }) {
   } = useGemini();
 
   const [input, setInput] = useState('');
+  const [localError, setLocalError] = useState(null);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const panelRef = useRef(null);
+
+  const error = localError || apiError;
 
   // Scroll to bottom when new messages arrive
   useEffect(() => {
@@ -40,10 +51,10 @@ export default function ChatAssistant({ isOpen, onToggle, prefillMessage }) {
 
   // Handle prefilled message from Timeline
   useEffect(() => {
-    if (prefillMessage && isOpen) {
+    if (prefillMessage && isOpen && input !== prefillMessage) {
       setInput(prefillMessage);
     }
-  }, [prefillMessage, isOpen]);
+  }, [prefillMessage, isOpen, input]);
 
   // Focus trap
   useEffect(() => {
@@ -77,13 +88,28 @@ export default function ChatAssistant({ isOpen, onToggle, prefillMessage }) {
     return () => panel.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onToggle]);
 
+  /**
+   * Validates and sends the user message.
+   */
   const handleSend = useCallback(() => {
-    const trimmed = sanitizeInput(input);
-    if (!trimmed || isStreaming || isLimited) return;
-    sendMessage(trimmed);
+    const { isValid, error: validationError } = validateChatInput(input);
+    
+    if (!isValid) {
+      setLocalError(validationError);
+      return;
+    }
+
+    if (isStreaming || isLimited) return;
+
+    setLocalError(null);
+    sendMessage(input.trim());
     setInput('');
   }, [input, isStreaming, isLimited, sendMessage]);
 
+  /**
+   * Handles Enter key press for sending messages.
+   * @param {React.KeyboardEvent} e - The keyboard event.
+   */
   const handleKeyPress = useCallback((e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -91,8 +117,13 @@ export default function ChatAssistant({ isOpen, onToggle, prefillMessage }) {
     }
   }, [handleSend]);
 
+  /**
+   * Handles selecting a suggested question.
+   * @param {string} q - The suggested question.
+   */
   const handleSuggestion = useCallback((q) => {
     setInput(q);
+    setLocalError(null);
     sendMessage(q);
   }, [sendMessage]);
 
@@ -194,7 +225,7 @@ export default function ChatAssistant({ isOpen, onToggle, prefillMessage }) {
       {/* Rate Limit Warning */}
       {isWarning && (
         <div className="chat-panel__warning" role="alert">
-          ⚠️ You have {10 - messageCount} messages remaining in this session.
+          ⚠️ You have {AI_CONFIG.MAX_MESSAGES - messageCount} messages remaining in this session.
         </div>
       )}
       {isLimited && (
@@ -210,19 +241,22 @@ export default function ChatAssistant({ isOpen, onToggle, prefillMessage }) {
         </div>
       )}
 
-      {/* Input */}
+      {/* Input Area */}
       <div className="chat-panel__input-area">
         <input
           ref={inputRef}
           className="chat-panel__input"
           type="text"
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={(e) => {
+            setInput(e.target.value);
+            if (localError) setLocalError(null);
+          }}
           onKeyDown={handleKeyPress}
           placeholder="Ask about elections..."
           disabled={isStreaming || isLimited}
           aria-label="Type your election question"
-          maxLength={500}
+          maxLength={VALIDATION_CONFIG.MAX_CHAT_LENGTH}
         />
         <button
           className="chat-panel__send"
@@ -245,7 +279,10 @@ export default function ChatAssistant({ isOpen, onToggle, prefillMessage }) {
 }
 
 ChatAssistant.propTypes = {
+  /** Whether the chat panel is currently open */
   isOpen: PropTypes.bool.isRequired,
+  /** Callback to toggle the chat panel visibility */
   onToggle: PropTypes.func.isRequired,
+  /** Optional message to pre-populate the chat input */
   prefillMessage: PropTypes.string,
 };

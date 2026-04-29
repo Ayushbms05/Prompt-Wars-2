@@ -6,26 +6,47 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { createRateLimiter } from '../utils/rateLimit';
 import { sanitizeInput } from '../utils/sanitize';
 import { getMockGeminiResponse } from '../utils/mockData';
+import { AI_CONFIG } from '../constants';
 
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-const SYSTEM_INSTRUCTION = `You are ElectionIQ, a helpful and non-partisan election education assistant for India. Explain voting, registration (Form 6), EPIC cards, EVMs, and VVPAT clearly. Use markdown.`;
 
 // Initialize the SDK outside the hook or within a ref to prevent re-init
 const genAI = API_KEY && API_KEY !== 'your_gemini_api_key_here' ? new GoogleGenerativeAI(API_KEY) : null;
 const model = genAI ? genAI.getGenerativeModel({ 
-  model: 'gemini-flash-latest',
-  systemInstruction: SYSTEM_INSTRUCTION 
+  model: AI_CONFIG.MODEL_NAME,
+  systemInstruction: AI_CONFIG.SYSTEM_INSTRUCTION 
 }) : null;
 
+/**
+ * Custom hook to interact with Gemini AI.
+ * @returns {{
+ *   messages: Array<{role: string, content: string, timestamp: number}>,
+ *   sendMessage: (prompt: string) => Promise<void>,
+ *   isStreaming: boolean,
+ *   error: string | null,
+ *   resetChat: () => void,
+ *   messageCount: number,
+ *   isWarning: boolean,
+ *   isLimited: boolean,
+ *   isDemo: boolean
+ * }}
+ */
 export default function useGemini() {
   const [messages, setMessages] = useState([]);
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState(null);
+  // Track message count in state for rendering safety
+  const [count, setCount] = useState(0);
+  
   const chatSessionRef = useRef(null);
-  const limiterRef = useRef(createRateLimiter(10, 8));
+  const limiterRef = useRef(createRateLimiter(AI_CONFIG.MAX_MESSAGES, AI_CONFIG.WARNING_THRESHOLD));
 
   const isDemo = !genAI || !model;
 
+  /**
+   * Sends a message to the AI and handles the streaming response.
+   * @param {string} prompt - The user input prompt.
+   */
   const sendMessage = useCallback(async (prompt) => {
     const sanitized = sanitizeInput(prompt);
     if (!sanitized) return;
@@ -37,6 +58,8 @@ export default function useGemini() {
     }
 
     limiter.increment();
+    setCount(limiter.getCount());
+    
     const userMessage = { role: 'user', content: sanitized, timestamp: Date.now() };
     setMessages((prev) => [...prev, userMessage]);
     setIsStreaming(true);
@@ -98,10 +121,14 @@ export default function useGemini() {
     }
   }, [isDemo]);
 
+  /**
+   * Resets the chat history and rate limiter.
+   */
   const resetChat = useCallback(() => {
     setMessages([]);
     setError(null);
     limiterRef.current.reset();
+    setCount(0);
     chatSessionRef.current = null;
   }, []);
 
@@ -111,9 +138,9 @@ export default function useGemini() {
     isStreaming,
     error,
     resetChat,
-    messageCount: limiterRef.current.getCount(),
-    isWarning: limiterRef.current.isWarning(),
-    isLimited: limiterRef.current.isLimited(),
+    messageCount: count,
+    isWarning: count >= AI_CONFIG.WARNING_THRESHOLD && count < AI_CONFIG.MAX_MESSAGES,
+    isLimited: count >= AI_CONFIG.MAX_MESSAGES,
     isDemo,
   };
 }

@@ -5,10 +5,21 @@ import { useState, useCallback } from 'react';
 import { sanitizeAddress } from '../utils/sanitize';
 import { getCache, setCache } from '../utils/cache';
 import { MOCK_CIVIC_DATA } from '../utils/mockData';
+import { API_ENDPOINTS, MAP_CONFIG } from '../constants';
 
 const API_KEY = import.meta.env.VITE_MAPS_API_KEY;
-const GEOCODE_URL = 'https://maps.googleapis.com/maps/api/geocode/json';
 
+/**
+ * Custom hook to find polling stations using Google Maps Geocoding API.
+ * @returns {{
+ *   data: any,
+ *   loading: boolean,
+ *   error: string | null,
+ *   lookupAddress: (rawAddress: string) => Promise<void>,
+ *   isDemo: boolean,
+ *   apiKey: string | undefined
+ * }}
+ */
 export default function useGoogleMaps() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -16,6 +27,10 @@ export default function useGoogleMaps() {
 
   const isDemo = !API_KEY || API_KEY === 'your_maps_api_key_here';
 
+  /**
+   * Looks up an address and finds the corresponding coordinates and polling info.
+   * @param {string} rawAddress - The user-entered address.
+   */
   const lookupAddress = useCallback(async (rawAddress) => {
     const address = sanitizeAddress(rawAddress);
     if (!address) {
@@ -39,7 +54,7 @@ export default function useGoogleMaps() {
     try {
       if (isDemo) {
         // Demo mode: return mock data after simulated delay
-        await new Promise((r) => setTimeout(r, 800));
+        await new Promise((r) => setTimeout(r, MAP_CONFIG.MOCK_DELAY));
         const mockResult = {
           ...MOCK_CIVIC_DATA,
           queriedAddress: address,
@@ -48,10 +63,10 @@ export default function useGoogleMaps() {
         setCache(cacheKey, mockResult);
       } else {
         // Real API call to Geocoding API
-        const url = new URL(GEOCODE_URL);
+        const url = new URL(API_ENDPOINTS.GOOGLE_MAPS_GEOCODE);
         url.searchParams.set('key', API_KEY);
         url.searchParams.set('address', address);
-        url.searchParams.set('components', 'country:IN');
+        url.searchParams.set('components', MAP_CONFIG.DEFAULT_COUNTRY);
 
         const response = await fetch(url.toString());
         if (!response.ok) {
@@ -91,6 +106,7 @@ export default function useGoogleMaps() {
         setCache(cacheKey, parsed);
       }
     } catch (err) {
+      console.error('Maps API Error:', err);
       // On error, fall back to mock data
       const mockResult = { ...MOCK_CIVIC_DATA, queriedAddress: address };
       setData(mockResult);

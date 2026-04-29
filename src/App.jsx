@@ -1,6 +1,3 @@
-/**
- * App.jsx — Main application shell for ElectionIQ.
- */
 import { useState, useCallback, lazy, Suspense } from 'react';
 import { TranslationProvider } from './contexts/TranslationContext';
 import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
@@ -13,21 +10,35 @@ import useTTS from './hooks/useTTS';
 
 const VideoHub = lazy(() => import('./components/VideoHub/VideoHub'));
 
+/**
+ * AppContent component containing the main layout and state.
+ * @returns {JSX.Element} The rendered AppContent component.
+ */
 function AppContent() {
   const [chatOpen, setChatOpen] = useState(false);
   const [prefillMessage, setPrefillMessage] = useState('');
   const { speak } = useTTS();
 
+  /**
+   * Handles opening the AI assistant with a prefilled prompt.
+   * @param {string} prompt - The prompt to prefill.
+   */
   const handleAskAI = useCallback((prompt) => {
     setPrefillMessage(prompt);
     setChatOpen(true);
   }, []);
 
+  /**
+   * Toggles the chat assistant visibility.
+   */
   const toggleChat = useCallback(() => {
     setChatOpen((prev) => !prev);
     if (chatOpen) setPrefillMessage('');
   }, [chatOpen]);
 
+  /**
+   * Reads the main content of the page aloud.
+   */
   const handleReadPage = useCallback(() => {
     const mainContent = document.getElementById('main-content');
     if (mainContent) {
@@ -145,6 +156,10 @@ function AppContent() {
   );
 }
 
+/**
+ * Main App component wrapped in providers.
+ * @returns {JSX.Element} The rendered App component.
+ */
 export default function App() {
   return (
     <TranslationProvider>

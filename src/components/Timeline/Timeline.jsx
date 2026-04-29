@@ -5,15 +5,25 @@
 import { useState, useCallback, useRef } from 'react';
 import PropTypes from 'prop-types';
 import TimelineStep from './TimelineStep';
-import { TIMELINE_STEPS } from '../../utils/mockData';
+import { TIMELINE_STEPS } from '../../constants';
 import useTTS from '../../hooks/useTTS';
 
+/**
+ * Timeline component displaying the election process steps.
+ * @param {Object} props - Component props.
+ * @param {Function} props.onAskAI - Callback to trigger AI assistant with a prompt.
+ * @returns {JSX.Element} The rendered Timeline component.
+ */
 export default function Timeline({ onAskAI }) {
   const [activeStep, setActiveStep] = useState(0);
   const [listeningStep, setListeningStep] = useState(null);
   const tabsRef = useRef([]);
   const { speak, isSpeaking, stop } = useTTS();
 
+  /**
+   * Handles keyboard navigation within the timeline tabs.
+   * @param {React.KeyboardEvent} e - The keyboard event.
+   */
   const handleKeyDown = useCallback((e) => {
     const { key } = e;
     let newIndex = activeStep;
@@ -38,6 +48,10 @@ export default function Timeline({ onAskAI }) {
     }
   }, [activeStep]);
 
+  /**
+   * Toggles the text-to-speech for a given step.
+   * @param {Object} step - The timeline step object.
+   */
   const handleListen = useCallback((step) => {
     if (isSpeaking && listeningStep === step.id) {
       stop();
@@ -48,6 +62,10 @@ export default function Timeline({ onAskAI }) {
     }
   }, [isSpeaking, listeningStep, speak, stop]);
 
+  /**
+   * Triggers the AI assistant with the step's specific prompt.
+   * @param {Object} step - The timeline step object.
+   */
   const handleAskAI = useCallback((step) => {
     if (onAskAI) {
       onAskAI(step.aiPrompt);
@@ -138,5 +156,6 @@ export default function Timeline({ onAskAI }) {
 }
 
 Timeline.propTypes = {
-  onAskAI: PropTypes.func,
+  /** Callback to trigger the AI assistant with a specific prompt */
+  onAskAI: PropTypes.func.isRequired,
 };

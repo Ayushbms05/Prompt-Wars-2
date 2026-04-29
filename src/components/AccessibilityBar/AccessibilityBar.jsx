@@ -6,9 +6,15 @@ import PropTypes from 'prop-types';
 import { useTranslation } from '../../contexts/TranslationContext';
 import useTTS from '../../hooks/useTTS';
 
+/**
+ * AccessibilityBar component for managing UI preferences.
+ * @param {Object} props - Component props.
+ * @param {Function} props.onReadPage - Function to read the page content.
+ * @returns {JSX.Element} The rendered AccessibilityBar component.
+ */
 export default function AccessibilityBar({ onReadPage }) {
   const { currentLanguage, setLanguage, languages } = useTranslation();
-  const { speak, isSpeaking, stop } = useTTS();
+  const { isSpeaking, stop } = useTTS();
   const [fontSize, setFontSize] = useState('medium');
   const [highContrast, setHighContrast] = useState(false);
   const [darkMode, setDarkMode] = useState(() => {
@@ -37,6 +43,9 @@ export default function AccessibilityBar({ onReadPage }) {
     document.documentElement.setAttribute('data-contrast', highContrast ? 'high' : 'normal');
   }, [highContrast]);
 
+  /**
+   * Cycles through font sizes: small, medium, large.
+   */
   const cycleFontSize = useCallback(() => {
     setFontSize((prev) => {
       if (prev === 'small') return 'medium';
@@ -45,6 +54,9 @@ export default function AccessibilityBar({ onReadPage }) {
     });
   }, []);
 
+  /**
+   * Handles the read aloud functionality.
+   */
   const handleReadAloud = useCallback(() => {
     if (isSpeaking) {
       stop();
@@ -129,5 +141,6 @@ export default function AccessibilityBar({ onReadPage }) {
 }
 
 AccessibilityBar.propTypes = {
-  onReadPage: PropTypes.func,
+  /** Callback to trigger page reading via TTS */
+  onReadPage: PropTypes.func.isRequired,
 };

@@ -2,7 +2,6 @@
  * ElectionIQ.test.js — Unit and integration tests.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { sanitizeInput, sanitizeAddress, isNonEmpty } from '../utils/sanitize';
 import { getCache, setCache, getBlobCache, setBlobCache } from '../utils/cache';

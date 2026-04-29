@@ -3,12 +3,23 @@
  */
 import PropTypes from 'prop-types';
 
+/**
+ * Individual step component in the election timeline.
+ * @param {Object} props - Component props.
+ * @param {Object} props.step - The step data object.
+ * @param {number} props.index - The index of the step.
+ * @param {boolean} props.isActive - Whether the step is currently active.
+ * @param {boolean} props.isCompleted - Whether the step has been completed.
+ * @param {Function} props.onListen - Callback to toggle text-to-speech for the step.
+ * @param {Function} props.onAskAI - Callback to trigger the AI assistant for the step.
+ * @param {boolean} props.isListening - Whether the step content is being read aloud.
+ * @returns {JSX.Element} The rendered TimelineStep component.
+ */
 export default function TimelineStep({
   step,
   index,
   isActive,
   isCompleted,
-  onSelect,
   onListen,
   onAskAI,
   isListening,
@@ -80,6 +91,7 @@ export default function TimelineStep({
 }
 
 TimelineStep.propTypes = {
+  /** The step data object */
   step: PropTypes.shape({
     id: PropTypes.string.isRequired,
     icon: PropTypes.string.isRequired,
@@ -97,11 +109,16 @@ TimelineStep.propTypes = {
     aiPrompt: PropTypes.string.isRequired,
     patternClass: PropTypes.string.isRequired,
   }).isRequired,
+  /** The index of the step in the timeline */
   index: PropTypes.number.isRequired,
+  /** Whether this step is the active one */
   isActive: PropTypes.bool.isRequired,
-  isCompleted: PropTypes.bool,
-  onSelect: PropTypes.func.isRequired,
+  /** Whether this step is considered completed */
+  isCompleted: PropTypes.bool.isRequired,
+  /** Callback to trigger text-to-speech */
   onListen: PropTypes.func.isRequired,
+  /** Callback to trigger the AI assistant */
   onAskAI: PropTypes.func.isRequired,
-  isListening: PropTypes.bool,
+  /** Whether the TTS is currently active for this step */
+  isListening: PropTypes.bool.isRequired,
 };
