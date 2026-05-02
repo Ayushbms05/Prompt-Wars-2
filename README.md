@@ -1,12 +1,12 @@
 # ElectionIQ — AI-Powered Election Education (India Edition)
 
-An interactive, multilingual web application that guides users through the Indian electoral process step by step — from voter registration to understanding results. Built with React and deeply integrated with 5 Google Cloud services.
+An interactive, multilingual web application that guides users through the Indian electoral process step by step — from voter registration to understanding results. Built with **React 19 + TypeScript** and deeply integrated with **5 Google Cloud services**.
 
 ## Quick Start
 
 ```bash
 # Install dependencies
-npm install
+npm install --legacy-peer-deps
 
 # Copy environment file and add your API keys
 cp .env.example .env
@@ -14,10 +14,13 @@ cp .env.example .env
 # Start development server
 npm run dev
 
+# Run linter (zero warnings enforced)
+npm run lint
+
 # Run tests
 npm test
 
-# Production build
+# Production build (TypeScript check + Vite build)
 npm run build
 ```
 
@@ -74,30 +77,75 @@ The language selector (8 languages) translates UI text via the Cloud Translation
 5. **Accessibility Bar** — Language, font size, contrast, dark mode, and read-aloud controls.
 6. **Official Verification** — Contextual links to ECI and NVSP portals embedded directly in action items.
 
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Language | **TypeScript** (strict mode) |
+| Framework | React 19 + Vite 8 |
+| AI SDK | `@google/generative-ai` |
+| Testing | Vitest + React Testing Library (32 tests) |
+| Linting | ESLint with TypeScript rules (zero-warning policy) |
+| Formatting | Prettier |
+| Pre-commit | Husky + lint-staged |
+| Styling | Vanilla CSS with custom properties |
+| Typography | Google Fonts (Playfair Display, Source Sans 3) |
+| Deployment | Docker + Nginx on Google Cloud Run |
+
+## Project Structure
+
+```
+src/
+├── types/          # Shared TypeScript interfaces (ElectionStep, ChatMessage, etc.)
+├── constants/      # Centralized config, mock data, API endpoints
+├── utils/          # logger, cache, sanitize, validate, rateLimit, mockData
+├── hooks/          # useGemini, useGoogleMaps, useTTS, useTranslate, useYouTube
+├── contexts/       # TranslationContext (language provider)
+├── components/     # AccessibilityBar, ChatAssistant, ErrorBoundary,
+│                   # PollingFinder, SkeletonLoader, Timeline, VideoHub
+├── __tests__/      # Unit + integration tests
+├── App.tsx         # Main app component
+├── main.tsx        # Entry point
+└── index.css       # All styles (BEM naming)
+```
+
 ## Cloud Run Deployment
 
 The app is configured for deployment on Google Cloud Run:
 - **Project ID**: `promptwars2-494717`
 - **Region**: `asia-south1` (Mumbai)
 
-To redeploy, ensure your `gcloud` CLI is authenticated and run:
+API keys are passed as **Cloud Build substitutions** (never committed to source):
+
 ```bash
 gcloud builds submit --config cloudbuild.yaml \
-  --substitutions "_VITE_GEMINI_API_KEY=...,_VITE_MAPS_API_KEY=..."
+  --substitutions "_VITE_GEMINI_API_KEY=YOUR_KEY,_VITE_MAPS_API_KEY=YOUR_KEY,_VITE_YOUTUBE_API_KEY=YOUR_KEY,_VITE_TTS_API_KEY=YOUR_KEY,_VITE_TRANSLATE_API_KEY=YOUR_KEY"
 ```
 
+Then deploy the built image:
+
+```bash
+gcloud run deploy election-iq \
+  --image asia-south1-docker.pkg.dev/promptwars2-494717/cloud-run-source-deploy/election-iq \
+  --region asia-south1 \
+  --platform managed \
+  --allow-unauthenticated \
+  --port 80
+```
+
+> **Security**: API keys are injected at Docker build time via `--build-arg` and baked into the static JS bundle. They are **never** stored in source control — `.env` is in `.gitignore`.
 
 ## Testing
 
 ```bash
 npm test              # Run all tests (32/32 passing)
-npm run test:coverage # Run with coverage report
+npm run test:coverage # Run with coverage report (80% threshold)
 ```
 
-## Tech Stack
+## Contributing
 
-- React 19 + Vite 8
-- `@google/generative-ai` SDK
-- Vitest + React Testing Library
-- Vanilla CSS with custom properties
-- Google Fonts (Playfair Display, Source Sans 3)
+See [CONTRIBUTING.md](CONTRIBUTING.md) for code style guide, feature workflow, branch naming conventions, and PR checklist.
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for a detailed history of changes following [Keep a Changelog](https://keepachangelog.com/) format.

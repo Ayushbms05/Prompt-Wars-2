@@ -1,12 +1,12 @@
 /**
- * ElectionIQ.test.js — Unit and integration tests.
+ * ElectionIQ.test.tsx — Unit and integration tests.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { sanitizeInput, sanitizeAddress, isNonEmpty } from '../utils/sanitize';
-import { getCache, setCache, getBlobCache, setBlobCache } from '../utils/cache';
-import { createRateLimiter } from '../utils/rateLimit';
-import { getMockGeminiResponse, getMockTranslation } from '../utils/mockData';
+import { sanitizeInput, sanitizeAddress, isNonEmpty } from 'utils/sanitize';
+import { getCache, setCache, getBlobCache, setBlobCache } from 'utils/cache';
+import { createRateLimiter } from 'utils/rateLimit';
+import { getMockGeminiResponse, getMockTranslation } from 'utils/mockData';
 
 // ===== UTILITY TESTS =====
 
@@ -188,7 +188,7 @@ describe('Language selector', () => {
   it('renders language dropdown', async () => {
     const { default: App } = await import('../App');
     render(<App />);
-    const sel = screen.getByLabelText('Select language');
+    const sel = screen.getByLabelText('Select language') as HTMLSelectElement;
     expect(sel).toBeDefined();
     expect(sel.options.length).toBe(8);
   });
@@ -196,9 +196,8 @@ describe('Language selector', () => {
   it('changes value on selection', async () => {
     const { default: App } = await import('../App');
     render(<App />);
-    const sel = screen.getByLabelText('Select language');
+    const sel = screen.getByLabelText('Select language') as HTMLSelectElement;
     fireEvent.change(sel, { target: { value: 'es' } });
-    // Language change is debounced, but select value updates immediately in the DOM
     await vi.waitFor(() => {
       expect(sel.value).toBe('es');
     });
@@ -207,8 +206,8 @@ describe('Language selector', () => {
 
 describe('Address form validation', () => {
   it('shows error for empty address', async () => {
-    const { default: PollingFinder } = await import('../components/PollingFinder/PollingFinder');
-    const { TranslationProvider } = await import('../contexts/TranslationContext');
+    const { default: PollingFinder } = await import('components/PollingFinder/PollingFinder');
+    const { TranslationProvider } = await import('contexts/TranslationContext');
     render(
       <TranslationProvider>
         <PollingFinder />

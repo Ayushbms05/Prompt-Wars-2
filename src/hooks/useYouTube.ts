@@ -1,36 +1,27 @@
 /**
- * useYouTube.js — Hook for YouTube Data API v3 with demo fallback.
+ * useYouTube.ts — Hook for YouTube Data API v3 with demo fallback.
  */
 import { useState, useCallback, useEffect } from 'react';
-import { getCache, setCache } from '../utils/cache';
-import { MOCK_VIDEOS } from '../utils/mockData';
-import { API_ENDPOINTS, YOUTUBE_CONFIG } from '../constants';
+import { getCache, setCache } from 'utils/cache';
+import { MOCK_VIDEOS } from 'utils/mockData';
+import { API_ENDPOINTS, YOUTUBE_CONFIG } from 'constants/index';
+import logger from 'utils/logger';
+import type { VideoResult, UseYouTubeReturn } from 'types/index';
 
 const API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY;
 
 /**
  * Custom hook to fetch election education videos from YouTube.
- * @returns {{
- *   videos: Array<{id: string, title: string, channelTitle: string, thumbnail: string, viewCount: string, publishedAt: string}>,
- *   loading: boolean,
- *   error: string | null,
- *   refresh: () => Promise<void>,
- *   isDemo: boolean
- * }}
  */
-export default function useYouTube() {
-  const [videos, setVideos] = useState([]);
+export default function useYouTube(): UseYouTubeReturn {
+  const [videos, setVideos] = useState<VideoResult[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   const isDemo = !API_KEY || API_KEY === 'your_youtube_data_api_key_here';
 
-  /**
-   * Searches for videos using the YouTube Data API or falls back to mock data.
-   */
-  const searchVideos = useCallback(async () => {
-    // Check cache first
-    const cached = getCache(YOUTUBE_CONFIG.CACHE_KEY);
+  const searchVideos = useCallback(async (): Promise<void> => {
+    const cached = getCache<VideoResult[]>(YOUTUBE_CONFIG.CACHE_KEY);
     if (cached) {
       setVideos(cached);
       setLoading(false);
@@ -42,11 +33,10 @@ export default function useYouTube() {
 
     try {
       if (isDemo) {
-        await new Promise((r) => setTimeout(r, YOUTUBE_CONFIG.MOCK_DELAY));
-        setVideos(MOCK_VIDEOS);
-        setCache(YOUTUBE_CONFIG.CACHE_KEY, MOCK_VIDEOS);
+        await new Promise<void>((r) => setTimeout(r, YOUTUBE_CONFIG.MOCK_DELAY));
+        setVideos([...MOCK_VIDEOS]);
+        setCache(YOUTUBE_CONFIG.CACHE_KEY, [...MOCK_VIDEOS]);
       } else {
-        // Step 1: Search for election education videos
         const searchParams = new URLSearchParams({
           key: API_KEY,
           q: YOUTUBE_CONFIG.DEFAULT_QUERY,
@@ -63,9 +53,8 @@ export default function useYouTube() {
         if (!searchRes.ok) throw new Error('YouTube search failed');
         const searchData = await searchRes.json();
 
-        const videoIds = searchData.items.map((item) => item.id.videoId).join(',');
+        const videoIds = searchData.items.map((item: { id: { videoId: string } }) => item.id.videoId).join(',');
 
-        // Step 2: Get video statistics
         const statsParams = new URLSearchParams({
           key: API_KEY,
           id: videoIds,
@@ -76,11 +65,11 @@ export default function useYouTube() {
         if (!statsRes.ok) throw new Error('Failed to fetch video details');
         const statsData = await statsRes.json();
 
-        const parsed = statsData.items.map((item) => ({
+        const parsed: VideoResult[] = statsData.items.map((item: any) => ({
           id: item.id,
           title: item.snippet.title,
           channelTitle: item.snippet.channelTitle,
-          thumbnail: item.snippet.thumbnails.medium?.url || item.snippet.thumbnails.default?.url,
+          thumbnail: item.snippet.thumbnails.medium?.url ?? item.snippet.thumbnails.default?.url,
           viewCount: Number(item.statistics.viewCount).toLocaleString(),
           publishedAt: item.snippet.publishedAt?.slice(0, 10),
         }));
@@ -88,12 +77,11 @@ export default function useYouTube() {
         setVideos(parsed);
         setCache(YOUTUBE_CONFIG.CACHE_KEY, parsed);
       }
-    } catch (err) {
-      console.error('YouTube API Error:', err);
-      // Fallback to mock data
-      setVideos(MOCK_VIDEOS);
+    } catch (err: unknown) {
+      logger.error('YouTube API Error:', err);
+      setVideos([...MOCK_VIDEOS]);
       setError('YouTube API unavailable. Showing demo videos.');
-      setCache(YOUTUBE_CONFIG.CACHE_KEY, MOCK_VIDEOS);
+      setCache(YOUTUBE_CONFIG.CACHE_KEY, [...MOCK_VIDEOS]);
     } finally {
       setLoading(false);
     }

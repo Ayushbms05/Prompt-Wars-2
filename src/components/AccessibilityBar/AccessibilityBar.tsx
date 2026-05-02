@@ -1,23 +1,28 @@
 /**
- * AccessibilityBar.jsx — Top bar with language, font size, contrast, dark mode, and read-aloud controls.
+ * AccessibilityBar.tsx — Top bar with language, font size, contrast, dark mode, and read-aloud controls.
  */
 import { useState, useEffect, useCallback } from 'react';
-import PropTypes from 'prop-types';
-import { useTranslation } from '../../contexts/TranslationContext';
-import useTTS from '../../hooks/useTTS';
+import { useTranslation } from 'contexts/TranslationContext';
+import useTTS from 'hooks/useTTS';
+
+/** Props for AccessibilityBar. */
+interface AccessibilityBarProps {
+  /** Function to read the page content */
+  readonly onReadPage: () => void;
+}
+
+/** Font size options. */
+type FontSize = 'small' | 'medium' | 'large';
 
 /**
  * AccessibilityBar component for managing UI preferences.
- * @param {Object} props - Component props.
- * @param {Function} props.onReadPage - Function to read the page content.
- * @returns {JSX.Element} The rendered AccessibilityBar component.
  */
-export default function AccessibilityBar({ onReadPage }) {
+export default function AccessibilityBar({ onReadPage }: AccessibilityBarProps) {
   const { currentLanguage, setLanguage, languages } = useTranslation();
   const { isSpeaking, stop } = useTTS();
-  const [fontSize, setFontSize] = useState('medium');
+  const [fontSize, setFontSize] = useState<FontSize>('medium');
   const [highContrast, setHighContrast] = useState(false);
-  const [darkMode, setDarkMode] = useState(() => {
+  const [darkMode, setDarkMode] = useState<boolean>(() => {
     try {
       return localStorage.getItem('electioniq-dark') === 'true';
     } catch {
@@ -43,10 +48,7 @@ export default function AccessibilityBar({ onReadPage }) {
     document.documentElement.setAttribute('data-contrast', highContrast ? 'high' : 'normal');
   }, [highContrast]);
 
-  /**
-   * Cycles through font sizes: small, medium, large.
-   */
-  const cycleFontSize = useCallback(() => {
+  const cycleFontSize = useCallback((): void => {
     setFontSize((prev) => {
       if (prev === 'small') return 'medium';
       if (prev === 'medium') return 'large';
@@ -54,10 +56,7 @@ export default function AccessibilityBar({ onReadPage }) {
     });
   }, []);
 
-  /**
-   * Handles the read aloud functionality.
-   */
-  const handleReadAloud = useCallback(() => {
+  const handleReadAloud = useCallback((): void => {
     if (isSpeaking) {
       stop();
     } else if (onReadPage) {
@@ -139,8 +138,3 @@ export default function AccessibilityBar({ onReadPage }) {
     </div>
   );
 }
-
-AccessibilityBar.propTypes = {
-  /** Callback to trigger page reading via TTS */
-  onReadPage: PropTypes.func.isRequired,
-};

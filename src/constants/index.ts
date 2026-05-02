@@ -1,11 +1,19 @@
 /**
- * src/constants/index.js
+ * src/constants/index.ts
  * Centralized store for magic strings, numbers, and config values.
  */
+import type {
+  Language,
+  ElectionStep,
+  VideoResult,
+  ElectionOfficial,
+  ElectionInfo,
+  VoiceConfig,
+  AudioConfig,
+} from 'types/index';
 
 /**
  * API Endpoints for external services.
- * @type {Object}
  */
 export const API_ENDPOINTS = {
   GEMINI: 'https://generativelanguage.googleapis.com',
@@ -14,44 +22,43 @@ export const API_ENDPOINTS = {
   YOUTUBE_VIDEOS: 'https://www.googleapis.com/youtube/v3/videos',
   CLOUD_TTS: 'https://texttospeech.googleapis.com/v1/text:synthesize',
   CLOUD_TRANSLATE: 'https://translation.googleapis.com/language/translate/v2',
-};
+} as const;
 
 /**
  * Configuration for the Gemini AI model.
- * @type {Object}
  */
 export const AI_CONFIG = {
   MODEL_NAME: 'gemini-flash-latest',
   SYSTEM_INSTRUCTION: `You are ElectionIQ, a helpful and non-partisan election education assistant for India. Explain voting, registration (Form 6), EPIC cards, EVMs, and VVPAT clearly. Use markdown.`,
   MAX_MESSAGES: 10,
   WARNING_THRESHOLD: 8,
-};
+} as const;
 
 /**
  * Configuration for Google Maps services.
- * @type {Object}
  */
 export const MAP_CONFIG = {
   DEFAULT_COUNTRY: 'country:IN',
   MOCK_DELAY: 800,
-};
+} as const;
 
 /**
  * Configuration for YouTube Data API v3.
- * @type {Object}
  */
 export const YOUTUBE_CONFIG = {
   MAX_RESULTS: '3',
   CACHE_KEY: 'yt_election_videos',
   MOCK_DELAY: 600,
   DEFAULT_QUERY: '"how to vote in india" OR "voter registration india" official election commission',
-};
+} as const;
 
 /**
  * Configuration for Cloud Text-to-Speech API.
- * @type {Object}
  */
-export const TTS_CONFIG = {
+export const TTS_CONFIG: {
+  readonly VOICE_MAP: Readonly<Record<string, VoiceConfig>>;
+  readonly AUDIO_CONFIG: AudioConfig;
+} = {
   VOICE_MAP: {
     en: { languageCode: 'en-US', name: 'en-US-Chirp3-HD-Charon' },
     es: { languageCode: 'es-US', name: 'es-US-Chirp3-HD-Charon' },
@@ -67,31 +74,28 @@ export const TTS_CONFIG = {
     speakingRate: 0.9,
     pitch: 0,
   },
-};
+} as const;
 
 /**
  * Configuration for Cloud Translation API.
- * @type {Object}
  */
 export const TRANSLATE_CONFIG = {
   DEBOUNCE_TIMER: 500,
-};
+} as const;
 
 /**
  * Configuration for input validation.
- * @type {Object}
  */
 export const VALIDATION_CONFIG = {
   MIN_ADDRESS_LENGTH: 10,
   MAX_ADDRESS_LENGTH: 200,
   MAX_CHAT_LENGTH: 500,
-};
+} as const;
 
 /**
  * Supported languages for the application.
- * @type {Array<{code: string, name: string, nativeName: string}>}
  */
-export const LANGUAGES = [
+export const LANGUAGES: readonly Language[] = [
   { code: 'en', name: 'English', nativeName: 'English' },
   { code: 'es', name: 'Spanish', nativeName: 'Español' },
   { code: 'hi', name: 'Hindi', nativeName: 'हिन्दी' },
@@ -104,9 +108,8 @@ export const LANGUAGES = [
 
 /**
  * Suggested questions for the AI assistant.
- * @type {string[]}
  */
-export const SUGGESTED_QUESTIONS = [
+export const SUGGESTED_QUESTIONS: readonly string[] = [
   'What is an EPIC card?',
   'How do I register using Form 6?',
   'How do EVMs and VVPATs work?',
@@ -117,9 +120,8 @@ export const SUGGESTED_QUESTIONS = [
 
 /**
  * Step-by-step data for the election timeline.
- * @type {Array<Object>}
  */
-export const TIMELINE_STEPS = [
+export const TIMELINE_STEPS: readonly ElectionStep[] = [
   {
     id: 'eligibility',
     icon: '✓',
@@ -213,17 +215,15 @@ export const TIMELINE_STEPS = [
 
 /**
  * Caching configuration.
- * @type {Object}
  */
 export const CACHE_CONFIG = {
   DEFAULT_TTL: 30 * 60 * 1000, // 30 minutes
-};
+} as const;
 
 /**
  * Mock data for demo responses.
- * @type {Object}
  */
-export const MOCK_RESPONSES = {
+export const MOCK_RESPONSES: Readonly<Record<string, string>> = {
   default: `Great question! Here's what you should know about the Indian election process:\n\nThe Election Commission of India (ECI) ensures free and fair elections. The process begins with voter registration. You can register online through the Voters' Service Portal or the Voter Helpline App by filling out Form 6.\n\nOnce registered, your name is added to the Electoral Roll (voter list) and you will receive an EPIC (Elector's Photo Identity Card). On polling day, you can cast your vote at your designated polling station using an EVM (Electronic Voting Machine), with a VVPAT to verify your vote.\n\nIs there anything specific about the Indian voting process you'd like to know more about?`,
 
   eligibility: `To be eligible to vote in Indian elections, you must meet these requirements:\n\n1. **Indian Citizenship** — You must be a citizen of India.\n\n2. **Age Requirement** — You must be 18 years old on or before the qualifying date (usually January 1st of the year of revision of electoral roll).\n\n3. **Ordinary Resident** — You must be ordinarily resident of the polling area of the constituency where you want to be enrolled.\n\n4. **Not Disqualified** — You must not be disqualified from voting under any law relating to corrupt practices or other offences.\n\nNRIs (Non-Resident Indians) holding an Indian passport can also register to vote in their home constituency.`,
@@ -237,11 +237,34 @@ export const MOCK_RESPONSES = {
   results: `Here's how election results work in India:\n\n**Counting Day:** EVMs are stored in heavily guarded strongrooms until the designated Counting Day. Counting takes place in the presence of candidates and their agents.\n\n**EVM Counting:** Votes from EVMs are tallied round by round. VVPAT slips from randomly selected polling stations are also counted to verify the EVM results.\n\n**Majority:** For the Lok Sabha (national), a party or coalition needs a majority of 272 out of 543 seats to form the government. Vidhan Sabha (state) majorities depend on the state's total seats.\n\n**Results:** The ECI publishes the results live on their official website and Voter Helpline App. Once a candidate secures the highest votes in a constituency, the Returning Officer officially declares them the winner.`,
 };
 
+/** Mock polling location for demo mode. */
+interface MockPollingLocation {
+  readonly address: {
+    readonly locationName: string;
+    readonly line1: string;
+    readonly city: string;
+    readonly state: string;
+    readonly zip: string;
+  };
+  readonly pollingHours: string;
+  readonly notes: string;
+  readonly lat: number;
+  readonly lng: number;
+}
+
+/** Mock civic data structure. */
+interface MockCivicData {
+  readonly election: ElectionInfo;
+  readonly pollingLocations: readonly MockPollingLocation[];
+  readonly officials: readonly ElectionOfficial[];
+  readonly lat: number;
+  readonly lng: number;
+}
+
 /**
  * Mock civic data for demo mode.
- * @type {Object}
  */
-export const MOCK_CIVIC_DATA = {
+export const MOCK_CIVIC_DATA: MockCivicData = {
   election: {
     name: 'General Election to Lok Sabha — Demo Data',
     electionDay: '2026-05-15',
@@ -283,9 +306,8 @@ export const MOCK_CIVIC_DATA = {
 
 /**
  * Mock video data for demo mode.
- * @type {Array<Object>}
  */
-export const MOCK_VIDEOS = [
+export const MOCK_VIDEOS: readonly VideoResult[] = [
   {
     id: 'dQw4w9WgXcQ',
     title: 'How to Vote using EVM and VVPAT - Official ECI Guide',
@@ -314,9 +336,8 @@ export const MOCK_VIDEOS = [
 
 /**
  * Mock translations for demo mode.
- * @type {Object}
  */
-export const MOCK_TRANSLATIONS = {
+export const MOCK_TRANSLATIONS: Readonly<Record<string, Record<string, string>>> = {
   hi: {
     'Check Eligibility': 'पात्रता जांचें',
     'Register to Vote': 'मतदान के लिए पंजीकरण करें',

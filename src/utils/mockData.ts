@@ -1,20 +1,14 @@
 /**
- * mockData.js — Realistic fallback data for demo mode (India Context).
- * When API keys are missing or calls fail, the app uses this data.
+ * mockData.ts — Realistic fallback data for demo mode (India Context).
  */
-import { 
-  MOCK_RESPONSES, 
-  MOCK_CIVIC_DATA, 
-  MOCK_VIDEOS, 
-  MOCK_TRANSLATIONS 
-} from '../constants';
+import { MOCK_RESPONSES, MOCK_CIVIC_DATA, MOCK_VIDEOS, MOCK_TRANSLATIONS } from 'constants/index';
 
 /**
  * Returns a mock AI response based on the prompt content.
- * @param {string} prompt - The user prompt.
- * @returns {string} The mock response.
+ * @param prompt - The user prompt.
+ * @returns The mock response.
  */
-export function getMockGeminiResponse(prompt) {
+export function getMockGeminiResponse(prompt: string): string {
   const lower = prompt.toLowerCase();
   if (lower.includes('eligib') || lower.includes('who can vote') || lower.includes('qualif'))
     return MOCK_RESPONSES.eligibility;
@@ -31,11 +25,11 @@ export function getMockGeminiResponse(prompt) {
 
 /**
  * Returns a mock translation for a given text and language.
- * @param {string} text - The source text.
- * @param {string} targetLang - The target language code.
- * @returns {string} The translated text.
+ * @param text - The source text.
+ * @param targetLang - The target language code.
+ * @returns The translated text.
  */
-export function getMockTranslation(text, targetLang) {
+export function getMockTranslation(text: string, targetLang: string): string {
   if (targetLang === 'en') return text;
   const langDict = MOCK_TRANSLATIONS[targetLang];
   if (langDict && langDict[text]) return langDict[text];

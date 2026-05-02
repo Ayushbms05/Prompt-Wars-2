@@ -1,17 +1,16 @@
 /**
- * VideoHub.jsx — Lazy-loaded YouTube video grid powered by YouTube Data API v3.
+ * VideoHub.tsx — Lazy-loaded YouTube video grid powered by YouTube Data API v3.
  */
 import { useState } from 'react';
-import useYouTube from '../../hooks/useYouTube';
-import SkeletonLoader from '../SkeletonLoader/SkeletonLoader';
+import useYouTube from 'hooks/useYouTube';
+import SkeletonLoader from 'components/SkeletonLoader/SkeletonLoader';
 
 /**
  * VideoHub component displaying a grid of election education videos.
- * @returns {JSX.Element} The rendered VideoHub component.
  */
 export default function VideoHub() {
   const { videos, loading, error, isDemo } = useYouTube();
-  const [activeVideo, setActiveVideo] = useState(null);
+  const [activeVideo, setActiveVideo] = useState<number | null>(null);
 
   return (
     <section className="video-hub" id="video-hub" aria-label="Election education videos">

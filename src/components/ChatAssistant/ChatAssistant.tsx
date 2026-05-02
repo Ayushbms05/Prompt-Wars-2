@@ -1,22 +1,25 @@
 /**
- * ChatAssistant.jsx — Floating AI chat panel powered by Gemini.
- * Features: streaming responses, rate limiting, suggested questions, focus trap.
+ * ChatAssistant.tsx — Floating AI chat panel powered by Gemini.
  */
-import { useState, useCallback, useRef, useEffect } from 'react';
-import PropTypes from 'prop-types';
-import useGemini from '../../hooks/useGemini';
-import { validateChatInput } from '../../utils/validate';
-import { SUGGESTED_QUESTIONS, AI_CONFIG, VALIDATION_CONFIG } from '../../constants';
+import { useState, useCallback, useRef, useEffect, type KeyboardEvent } from 'react';
+import useGemini from 'hooks/useGemini';
+import { validateChatInput } from 'utils/validate';
+import { SUGGESTED_QUESTIONS, AI_CONFIG, VALIDATION_CONFIG } from 'constants/index';
+
+/** Props for ChatAssistant. */
+interface ChatAssistantProps {
+  /** Whether the chat panel is open */
+  readonly isOpen: boolean;
+  /** Callback to toggle the chat panel visibility */
+  readonly onToggle: () => void;
+  /** Optional message to pre-populate the input */
+  readonly prefillMessage?: string;
+}
 
 /**
  * ChatAssistant component for AI-powered Q&A.
- * @param {Object} props - Component props.
- * @param {boolean} props.isOpen - Whether the chat panel is open.
- * @param {Function} props.onToggle - Callback to toggle the chat panel visibility.
- * @param {string} [props.prefillMessage] - Optional message to pre-populate the input.
- * @returns {JSX.Element} The rendered ChatAssistant component.
  */
-export default function ChatAssistant({ isOpen, onToggle, prefillMessage }) {
+export default function ChatAssistant({ isOpen, onToggle, prefillMessage }: ChatAssistantProps) {
   const {
     messages,
     sendMessage,
@@ -30,39 +33,35 @@ export default function ChatAssistant({ isOpen, onToggle, prefillMessage }) {
   } = useGemini();
 
   const [input, setInput] = useState('');
-  const [localError, setLocalError] = useState(null);
-  const messagesEndRef = useRef(null);
-  const inputRef = useRef(null);
-  const panelRef = useRef(null);
+  const [localError, setLocalError] = useState<string | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const panelRef = useRef<HTMLDivElement | null>(null);
 
-  const error = localError || apiError;
+  const error = localError ?? apiError;
 
-  // Scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Focus input when opened
   useEffect(() => {
     if (isOpen && inputRef.current) {
       inputRef.current.focus();
     }
   }, [isOpen]);
 
-  // Handle prefilled message from Timeline
   useEffect(() => {
     if (prefillMessage && isOpen && input !== prefillMessage) {
       setInput(prefillMessage);
     }
   }, [prefillMessage, isOpen, input]);
 
-  // Focus trap
   useEffect(() => {
     if (!isOpen) return;
     const panel = panelRef.current;
     if (!panel) return;
 
-    const handleKeyDown = (e) => {
+    const handleKeyDown = (e: globalThis.KeyboardEvent): void => {
       if (e.key === 'Escape') {
         onToggle();
         return;
@@ -72,8 +71,8 @@ export default function ChatAssistant({ isOpen, onToggle, prefillMessage }) {
       const focusable = panel.querySelectorAll(
         'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
       );
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
+      const first = focusable[0] as HTMLElement;
+      const last = focusable[focusable.length - 1] as HTMLElement;
 
       if (e.shiftKey && document.activeElement === first) {
         e.preventDefault();
@@ -88,12 +87,9 @@ export default function ChatAssistant({ isOpen, onToggle, prefillMessage }) {
     return () => panel.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onToggle]);
 
-  /**
-   * Validates and sends the user message.
-   */
-  const handleSend = useCallback(() => {
+  const handleSend = useCallback((): void => {
     const { isValid, error: validationError } = validateChatInput(input);
-    
+
     if (!isValid) {
       setLocalError(validationError);
       return;
@@ -106,22 +102,14 @@ export default function ChatAssistant({ isOpen, onToggle, prefillMessage }) {
     setInput('');
   }, [input, isStreaming, isLimited, sendMessage]);
 
-  /**
-   * Handles Enter key press for sending messages.
-   * @param {React.KeyboardEvent} e - The keyboard event.
-   */
-  const handleKeyPress = useCallback((e) => {
+  const handleKeyPress = useCallback((e: KeyboardEvent<HTMLInputElement>): void => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
   }, [handleSend]);
 
-  /**
-   * Handles selecting a suggested question.
-   * @param {string} q - The suggested question.
-   */
-  const handleSuggestion = useCallback((q) => {
+  const handleSuggestion = useCallback((q: string): void => {
     setInput(q);
     setLocalError(null);
     sendMessage(q);
@@ -277,12 +265,3 @@ export default function ChatAssistant({ isOpen, onToggle, prefillMessage }) {
     </div>
   );
 }
-
-ChatAssistant.propTypes = {
-  /** Whether the chat panel is currently open */
-  isOpen: PropTypes.bool.isRequired,
-  /** Callback to toggle the chat panel visibility */
-  onToggle: PropTypes.func.isRequired,
-  /** Optional message to pre-populate the chat input */
-  prefillMessage: PropTypes.string,
-};

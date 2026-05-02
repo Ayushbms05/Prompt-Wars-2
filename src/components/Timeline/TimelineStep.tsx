@@ -1,19 +1,28 @@
 /**
- * TimelineStep.jsx — Individual step card within the election timeline.
+ * TimelineStep.tsx — Individual step card within the election timeline.
  */
-import PropTypes from 'prop-types';
+import type { ElectionStep } from 'types/index';
+
+/** Props for TimelineStep. */
+interface TimelineStepProps {
+  /** The step data object */
+  readonly step: ElectionStep;
+  /** The index of the step */
+  readonly index: number;
+  /** Whether the step is currently active */
+  readonly isActive: boolean;
+  /** Whether the step has been completed */
+  readonly isCompleted: boolean;
+  /** Callback to trigger text-to-speech for the step */
+  readonly onListen: (step: ElectionStep) => void;
+  /** Callback to trigger the AI assistant for the step */
+  readonly onAskAI: (step: ElectionStep) => void;
+  /** Whether the step content is being read aloud */
+  readonly isListening: boolean;
+}
 
 /**
  * Individual step component in the election timeline.
- * @param {Object} props - Component props.
- * @param {Object} props.step - The step data object.
- * @param {number} props.index - The index of the step.
- * @param {boolean} props.isActive - Whether the step is currently active.
- * @param {boolean} props.isCompleted - Whether the step has been completed.
- * @param {Function} props.onListen - Callback to toggle text-to-speech for the step.
- * @param {Function} props.onAskAI - Callback to trigger the AI assistant for the step.
- * @param {boolean} props.isListening - Whether the step content is being read aloud.
- * @returns {JSX.Element} The rendered TimelineStep component.
  */
 export default function TimelineStep({
   step,
@@ -23,7 +32,7 @@ export default function TimelineStep({
   onListen,
   onAskAI,
   isListening,
-}) {
+}: TimelineStepProps) {
   return (
     <div
       className={`timeline-step ${isActive ? 'timeline-step--active' : ''} ${isCompleted ? 'timeline-step--completed' : ''} ${step.patternClass}`}
@@ -45,7 +54,7 @@ export default function TimelineStep({
           {step.checklist.map((item, i) => {
             const text = typeof item === 'string' ? item : item.text;
             const link = typeof item === 'string' ? null : item.link;
-            
+
             return (
               <li key={i} className="timeline-step__checklist-item">
                 <span className="timeline-step__check" aria-hidden="true">☐</span>
@@ -89,36 +98,3 @@ export default function TimelineStep({
     </div>
   );
 }
-
-TimelineStep.propTypes = {
-  /** The step data object */
-  step: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    icon: PropTypes.string.isRequired,
-    title: PropTypes.string.isRequired,
-    explanation: PropTypes.string.isRequired,
-    checklist: PropTypes.arrayOf(
-      PropTypes.oneOfType([
-        PropTypes.string,
-        PropTypes.shape({
-          text: PropTypes.string.isRequired,
-          link: PropTypes.string,
-        }),
-      ])
-    ).isRequired,
-    aiPrompt: PropTypes.string.isRequired,
-    patternClass: PropTypes.string.isRequired,
-  }).isRequired,
-  /** The index of the step in the timeline */
-  index: PropTypes.number.isRequired,
-  /** Whether this step is the active one */
-  isActive: PropTypes.bool.isRequired,
-  /** Whether this step is considered completed */
-  isCompleted: PropTypes.bool.isRequired,
-  /** Callback to trigger text-to-speech */
-  onListen: PropTypes.func.isRequired,
-  /** Callback to trigger the AI assistant */
-  onAskAI: PropTypes.func.isRequired,
-  /** Whether the TTS is currently active for this step */
-  isListening: PropTypes.bool.isRequired,
-};

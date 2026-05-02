@@ -1,16 +1,16 @@
 /**
- * sanitize.js — Input sanitization utilities.
+ * sanitize.ts — Input sanitization utilities.
  * Strips dangerous characters before sending user input to any API.
  */
-import { VALIDATION_CONFIG } from '../constants';
+import { VALIDATION_CONFIG } from 'constants/index';
 
 /**
  * Sanitize generic user input: strip HTML, trim, limit length.
- * @param {string} input - Raw user string.
- * @param {number} [maxLen=VALIDATION_CONFIG.MAX_CHAT_LENGTH] - Maximum allowed length.
- * @returns {string} Sanitized string.
+ * @param input - Raw user string.
+ * @param maxLen - Maximum allowed length.
+ * @returns Sanitized string.
  */
-export function sanitizeInput(input, maxLen = VALIDATION_CONFIG.MAX_CHAT_LENGTH) {
+export function sanitizeInput(input: unknown, maxLen: number = VALIDATION_CONFIG.MAX_CHAT_LENGTH): string {
   if (typeof input !== 'string') return '';
   return input
     .replace(/<[^>]*>/g, '')       // strip HTML tags
@@ -21,10 +21,10 @@ export function sanitizeInput(input, maxLen = VALIDATION_CONFIG.MAX_CHAT_LENGTH)
 
 /**
  * Sanitize an address string for the Maps/Civic API.
- * @param {string} address - Raw address.
- * @returns {string} Sanitized address.
+ * @param address - Raw address.
+ * @returns Sanitized address.
  */
-export function sanitizeAddress(address) {
+export function sanitizeAddress(address: unknown): string {
   if (typeof address !== 'string') return '';
   return address
     .replace(/<[^>]*>/g, '')
@@ -36,9 +36,9 @@ export function sanitizeAddress(address) {
 
 /**
  * Validate that a string is non-empty after sanitization.
- * @param {string} str - The string to check.
- * @returns {boolean} True if non-empty.
+ * @param str - The string to check.
+ * @returns True if non-empty.
  */
-export function isNonEmpty(str) {
+export function isNonEmpty(str: unknown): boolean {
   return typeof str === 'string' && str.trim().length > 0;
 }

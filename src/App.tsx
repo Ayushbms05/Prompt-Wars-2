@@ -1,48 +1,40 @@
+/**
+ * App.tsx — Main application component for ElectionIQ.
+ */
 import { useState, useCallback, lazy, Suspense } from 'react';
-import { TranslationProvider } from './contexts/TranslationContext';
-import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
-import AccessibilityBar from './components/AccessibilityBar/AccessibilityBar';
-import Timeline from './components/Timeline/Timeline';
-import ChatAssistant from './components/ChatAssistant/ChatAssistant';
-import PollingFinder from './components/PollingFinder/PollingFinder';
-import SkeletonLoader from './components/SkeletonLoader/SkeletonLoader';
-import useTTS from './hooks/useTTS';
+import { TranslationProvider } from 'contexts/TranslationContext';
+import ErrorBoundary from 'components/ErrorBoundary/ErrorBoundary';
+import AccessibilityBar from 'components/AccessibilityBar/AccessibilityBar';
+import Timeline from 'components/Timeline/Timeline';
+import ChatAssistant from 'components/ChatAssistant/ChatAssistant';
+import PollingFinder from 'components/PollingFinder/PollingFinder';
+import SkeletonLoader from 'components/SkeletonLoader/SkeletonLoader';
+import useTTS from 'hooks/useTTS';
 
-const VideoHub = lazy(() => import('./components/VideoHub/VideoHub'));
+const VideoHub = lazy(() => import('components/VideoHub/VideoHub'));
 
 /**
  * AppContent component containing the main layout and state.
- * @returns {JSX.Element} The rendered AppContent component.
  */
 function AppContent() {
   const [chatOpen, setChatOpen] = useState(false);
   const [prefillMessage, setPrefillMessage] = useState('');
   const { speak } = useTTS();
 
-  /**
-   * Handles opening the AI assistant with a prefilled prompt.
-   * @param {string} prompt - The prompt to prefill.
-   */
-  const handleAskAI = useCallback((prompt) => {
+  const handleAskAI = useCallback((prompt: string): void => {
     setPrefillMessage(prompt);
     setChatOpen(true);
   }, []);
 
-  /**
-   * Toggles the chat assistant visibility.
-   */
-  const toggleChat = useCallback(() => {
+  const toggleChat = useCallback((): void => {
     setChatOpen((prev) => !prev);
     if (chatOpen) setPrefillMessage('');
   }, [chatOpen]);
 
-  /**
-   * Reads the main content of the page aloud.
-   */
-  const handleReadPage = useCallback(() => {
+  const handleReadPage = useCallback((): void => {
     const mainContent = document.getElementById('main-content');
     if (mainContent) {
-      const text = mainContent.innerText?.slice(0, 3000) || '';
+      const text = mainContent.innerText?.slice(0, 3000) ?? '';
       speak(text, 'en');
     }
   }, [speak]);
@@ -158,7 +150,6 @@ function AppContent() {
 
 /**
  * Main App component wrapped in providers.
- * @returns {JSX.Element} The rendered App component.
  */
 export default function App() {
   return (

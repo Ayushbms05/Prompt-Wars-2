@@ -1,30 +1,28 @@
 /**
- * Timeline.jsx — Horizontal stepper with 6 election stages.
- * Supports keyboard navigation (Arrow keys, Enter).
+ * Timeline.tsx — Horizontal stepper with 6 election stages.
  */
-import { useState, useCallback, useRef } from 'react';
-import PropTypes from 'prop-types';
+import { useState, useCallback, useRef, type KeyboardEvent } from 'react';
 import TimelineStep from './TimelineStep';
-import { TIMELINE_STEPS } from '../../constants';
-import useTTS from '../../hooks/useTTS';
+import { TIMELINE_STEPS } from 'constants/index';
+import useTTS from 'hooks/useTTS';
+import type { ElectionStep } from 'types/index';
+
+/** Props for Timeline. */
+interface TimelineProps {
+  /** Callback to trigger AI assistant with a prompt */
+  readonly onAskAI: (prompt: string) => void;
+}
 
 /**
  * Timeline component displaying the election process steps.
- * @param {Object} props - Component props.
- * @param {Function} props.onAskAI - Callback to trigger AI assistant with a prompt.
- * @returns {JSX.Element} The rendered Timeline component.
  */
-export default function Timeline({ onAskAI }) {
+export default function Timeline({ onAskAI }: TimelineProps) {
   const [activeStep, setActiveStep] = useState(0);
-  const [listeningStep, setListeningStep] = useState(null);
-  const tabsRef = useRef([]);
+  const [listeningStep, setListeningStep] = useState<string | null>(null);
+  const tabsRef = useRef<(HTMLButtonElement | null)[]>([]);
   const { speak, isSpeaking, stop } = useTTS();
 
-  /**
-   * Handles keyboard navigation within the timeline tabs.
-   * @param {React.KeyboardEvent} e - The keyboard event.
-   */
-  const handleKeyDown = useCallback((e) => {
+  const handleKeyDown = useCallback((e: KeyboardEvent<HTMLDivElement>): void => {
     const { key } = e;
     let newIndex = activeStep;
 
@@ -48,11 +46,7 @@ export default function Timeline({ onAskAI }) {
     }
   }, [activeStep]);
 
-  /**
-   * Toggles the text-to-speech for a given step.
-   * @param {Object} step - The timeline step object.
-   */
-  const handleListen = useCallback((step) => {
+  const handleListen = useCallback((step: ElectionStep): void => {
     if (isSpeaking && listeningStep === step.id) {
       stop();
       setListeningStep(null);
@@ -62,11 +56,7 @@ export default function Timeline({ onAskAI }) {
     }
   }, [isSpeaking, listeningStep, speak, stop]);
 
-  /**
-   * Triggers the AI assistant with the step's specific prompt.
-   * @param {Object} step - The timeline step object.
-   */
-  const handleAskAI = useCallback((step) => {
+  const handleAskAI = useCallback((step: ElectionStep): void => {
     if (onAskAI) {
       onAskAI(step.aiPrompt);
     }
@@ -81,7 +71,6 @@ export default function Timeline({ onAskAI }) {
         </p>
       </div>
 
-      {/* Tab List — Horizontal Stepper */}
       <div
         className="timeline__tabs"
         role="tablist"
@@ -91,7 +80,7 @@ export default function Timeline({ onAskAI }) {
         {TIMELINE_STEPS.map((step, index) => (
           <button
             key={step.id}
-            ref={(el) => (tabsRef.current[index] = el)}
+            ref={(el) => { tabsRef.current[index] = el; }}
             className={`timeline__tab ${index === activeStep ? 'timeline__tab--active' : ''} ${index < activeStep ? 'timeline__tab--completed' : ''}`}
             role="tab"
             id={`step-tab-${index}`}
@@ -107,7 +96,6 @@ export default function Timeline({ onAskAI }) {
         ))}
       </div>
 
-      {/* Step Connector Line */}
       <div className="timeline__progress" aria-hidden="true">
         <div
           className="timeline__progress-fill"
@@ -115,21 +103,18 @@ export default function Timeline({ onAskAI }) {
         />
       </div>
 
-      {/* Active Step Panel */}
       <div className="timeline__panel">
         <TimelineStep
           step={TIMELINE_STEPS[activeStep]}
           index={activeStep}
           isActive={true}
           isCompleted={false}
-          onSelect={setActiveStep}
           onListen={handleListen}
           onAskAI={handleAskAI}
           isListening={isSpeaking && listeningStep === TIMELINE_STEPS[activeStep].id}
         />
       </div>
 
-      {/* Step Navigation Buttons (Mobile-friendly) */}
       <div className="timeline__nav">
         <button
           className="timeline__nav-btn"
@@ -154,8 +139,3 @@ export default function Timeline({ onAskAI }) {
     </section>
   );
 }
-
-Timeline.propTypes = {
-  /** Callback to trigger the AI assistant with a specific prompt */
-  onAskAI: PropTypes.func.isRequired,
-};

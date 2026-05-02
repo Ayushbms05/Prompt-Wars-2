@@ -1,15 +1,15 @@
-import js from '@eslint/js'
-import globals from 'globals'
-import reactHooks from 'eslint-plugin-react-hooks'
-import reactRefresh from 'eslint-plugin-react-refresh'
-import reactPlugin from 'eslint-plugin-react'
+import js from '@eslint/js';
+import globals from 'globals';
+import reactHooks from 'eslint-plugin-react-hooks';
+import reactRefresh from 'eslint-plugin-react-refresh';
+import tseslint from 'typescript-eslint';
 
-export default [
+export default tseslint.config(
   {
-    ignores: ['dist', 'node_modules'],
+    ignores: ['dist', 'node_modules', 'coverage', '*.config.*'],
   },
   {
-    files: ['**/*.{js,jsx}'],
+    files: ['**/*.{ts,tsx}'],
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
@@ -17,6 +17,7 @@ export default [
         ...globals.browser,
         ...globals.es2021,
       },
+      parser: tseslint.parser,
       parserOptions: {
         ecmaFeatures: {
           jsx: true,
@@ -24,29 +25,25 @@ export default [
       },
     },
     plugins: {
-      react: reactPlugin,
       'react-hooks': reactHooks,
       'react-refresh': reactRefresh,
+      '@typescript-eslint': tseslint.plugin,
     },
     rules: {
       ...js.configs.recommended.rules,
-      ...reactPlugin.configs.recommended.rules,
       ...reactHooks.configs.recommended.rules,
-      'react/prop-types': 'error',
-      'react/react-in-jsx-scope': 'off',
-      'react-hooks/exhaustive-deps': 'warn',
-      'react-hooks/set-state-in-effect': 'off', // Disable aggressive rule
+      'no-console': 'error',
+      'no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      'react-hooks/exhaustive-deps': 'error',
+      'react-hooks/set-state-in-effect': 'off',
       'react-refresh/only-export-components': [
         'warn',
         { allowConstantExport: true },
       ],
-      'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
-      'no-console': ['warn', { allow: ['warn', 'error'] }],
-    },
-    settings: {
-      react: {
-        version: '18.2',
-      },
+      'prefer-const': 'error',
+      'no-var': 'error',
+      'eqeqeq': 'error',
     },
   },
-]
+);
